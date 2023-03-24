@@ -1,12 +1,18 @@
 import copy
 from rete.common import BetaNode
+from rete.join_node import JoinNode
+from typing import List
+from rete.common import Token
+from rete.common import WME
+from typing import Any
+from typing import Dict
 
 
 class BindNode(BetaNode):
 
     kind = 'bind-node'
 
-    def __init__(self, children, parent, tmpl, to):
+    def __init__(self, children: List, parent: JoinNode, tmpl: str, to: str) -> None:
         """
         :type children:
         :type parent: BetaNode
@@ -16,7 +22,7 @@ class BindNode(BetaNode):
         self.tmpl = tmpl
         self.bind = to
 
-    def left_activation(self, token, wme, binding=None):
+    def left_activation(self, token: Token, wme: WME, binding: Dict[str, Any] = None) -> None:
         """
         :type binding: dict
         :type wme: WME

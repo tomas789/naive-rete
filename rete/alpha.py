@@ -1,9 +1,19 @@
 from rete.common import FIELDS
+from rete.alpha import ConstantTestNode
+from rete.alpha import VarConsistencyTestNode
+from typing import List
+from rete.alpha import AlphaMemory
+from typing import Dict
+from typing import Optional
+from typing import Tuple
+from typing import Union
+from typing import Any
+from rete.common import WME
 
 
 class VarConsistencyTestNode:
 
-    def __init__(self, var, pos, amem=None, children=None):
+    def __init__(self, var: str, pos: List[str], amem: Optional[Any] = None, children: Optional[Any] = None) -> None:
         self.var = var
         self.pos = pos
         self.amem = amem
@@ -17,7 +27,7 @@ class VarConsistencyTestNode:
     def dump(self):
         return "%s at %s?" % (self.var, self.pos)
 
-    def test(self, wme):
+    def test(self, wme: WME) -> bool:
         to_compare = []
         for t in self.pos:
             to_compare.append(getattr(wme, t))
@@ -25,7 +35,7 @@ class VarConsistencyTestNode:
         return len(set(to_compare)) <= 1
 
     @staticmethod
-    def build_or_share(parent, var, pos):
+    def build_or_share(parent: ConstantTestNode, var: str, pos: List[str]) -> VarConsistencyTestNode:
 
         for child in parent.children:
             if type(child) is VarConsistencyTestNode:
@@ -36,7 +46,7 @@ class VarConsistencyTestNode:
         parent.children.append(new_node)
         return new_node
 
-    def activation(self, wme):
+    def activation(self, wme: WME) -> Optional[bool]:
 
         if not self.test(wme):
             return False
@@ -49,7 +59,7 @@ class VarConsistencyTestNode:
 
 class ConstantTestNode:
 
-    def __init__(self, field_to_test, field_must_equal=None, amem=None, children=None, variables=None):
+    def __init__(self, field_to_test: str, field_must_equal: Optional[str] = None, amem: Optional[AlphaMemory] = None, children: Optional[List] = None, variables: Optional[Dict[str, List[str]]] = None) -> None:
         """
         :type field_to_test: str
         :type children: list of ConstantTestNode
@@ -67,14 +77,14 @@ class ConstantTestNode:
     def dump(self):
         return "%s=%s?" % (self.field_to_test, self.field_must_equal)
 
-    def _constant_check(self, wme):
+    def _constant_check(self, wme: WME) -> bool:
         v = getattr(wme, self.field_to_test)
         if v != self.field_must_equal:
             return False
         else:
             return True
 
-    def _variables_check(self, wme):
+    def _variables_check(self, wme: WME) -> bool:
 
         to_compare = []
 
@@ -86,7 +96,7 @@ class ConstantTestNode:
 
         return len(set(to_compare)) <= 1
 
-    def activation(self, wme):
+    def activation(self, wme: WME) -> Optional[bool]:
         """
         :type wme: rete.WME
         """
@@ -104,7 +114,7 @@ class ConstantTestNode:
             child.activation(wme)
 
     @classmethod
-    def build_or_share_alpha_memory(cls, node, constants=None, variables=None):
+    def build_or_share_alpha_memory(cls, node: Union[ConstantTestNode, VarConsistencyTestNode], constants: List[Tuple[str, str]] = None, variables: Optional[Dict[str, List[str]]] = None) -> AlphaMemory:
         """
         :type node: ConstantTestNode
         :type path: [(field, value)...]
@@ -128,7 +138,7 @@ class ConstantTestNode:
         return cls.build_or_share_alpha_memory(next_node, constants)
 
     @staticmethod
-    def build_or_share_constant_test_node(parent, field, symbol, variables):
+    def build_or_share_constant_test_node(parent: ConstantTestNode, field: str, symbol: str, variables: Optional[Dict[str, List[str]]]) -> ConstantTestNode:
         """
         :rtype: ConstantTestNode
         :type symbol: str
@@ -145,7 +155,7 @@ class ConstantTestNode:
 
 class AlphaMemory:
 
-    def __init__(self, items=None, successors=None):
+    def __init__(self, items: Optional[Any] = None, successors: Optional[Any] = None) -> None:
         """
         :type successors: list of BetaNode
         :type items: list of rete.WME
@@ -153,7 +163,7 @@ class AlphaMemory:
         self.items = items if items else []
         self.successors = successors if successors else []
 
-    def activation(self, wme):
+    def activation(self, wme: WME) -> None:
         """
         :type wme: rete.WME
         """

@@ -1,3 +1,14 @@
+from typing import List
+from typing import Tuple
+from rete.common import WME
+from typing import Optional
+from typing import Union
+from rete.common import Token
+from typing import Any
+from rete.common import Has
+from rete.common import Filter
+from rete.common import Bind
+from typing import Dict
 # -*- coding: utf-8 -*-
 
 FIELDS = ['identifier', 'attribute', 'value']
@@ -5,7 +16,7 @@ FIELDS = ['identifier', 'attribute', 'value']
 
 class BetaNode(object):
 
-    def __init__(self, children=None, parent=None):
+    def __init__(self, children: Optional[List] = None, parent: Any = None) -> None:
         self.children = children if children else []
         self.parent = parent
 
@@ -15,7 +26,7 @@ class BetaNode(object):
 
 class Has:
 
-    def __init__(self, identifier=None, attribute=None, value=None):
+    def __init__(self, identifier: str = None, attribute: str = None, value: str = None) -> None:
         """
         (<x> ^self <y>)
         repr as:
@@ -32,14 +43,14 @@ class Has:
     def __repr__(self):
         return "(%s %s %s)" % (self.identifier, self.attribute, self.value)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Has) -> bool:
         return self.__class__ == other.__class__ \
                and self.identifier == other.identifier \
                and self.attribute == other.attribute \
                and self.value == other.value
 
     @property
-    def vars(self):
+    def vars(self) -> List[Tuple[str, str]]:
         """
         :rtype: list
         """
@@ -50,7 +61,7 @@ class Has:
                 ret.append((field, v))
         return ret
 
-    def contain(self, v):
+    def contain(self, v: str) -> str:
         """
         :type v: Var
         :rtype: bool
@@ -61,7 +72,7 @@ class Has:
                 return f
         return ""
 
-    def test(self, w):
+    def test(self, w: WME) -> bool:
         """
         :type w: rete.WME
         """
@@ -82,7 +93,7 @@ class Neg(Has):
 
 class Rule(list):
 
-    def __init__(self, *args):
+    def __init__(self, *args: Any) -> None:
         self.extend(args)
 
 
@@ -92,31 +103,31 @@ class Ncc(Rule):
         return "-%s" % super(Ncc, self).__repr__()
 
     @property
-    def number_of_conditions(self):
+    def number_of_conditions(self) -> int:
         return len(self)
 
 
 class Filter:
-    def __init__(self, tmpl):
+    def __init__(self, tmpl: str) -> None:
         self.tmpl = tmpl
 
-    def __eq__(self, other):
+    def __eq__(self, other: Filter) -> bool:
         return isinstance(other, Filter) and self.tmpl == other.tmpl
 
 
 class Bind:
-    def __init__(self, tmp, to):
+    def __init__(self, tmp: str, to: str) -> None:
         self.tmpl = tmp
         self.to = to
 
-    def __eq__(self, other):
+    def __eq__(self, other: Bind) -> bool:
         return isinstance(other, Bind) and \
                self.tmpl == other.tmpl and self.to == other.to
 
 
 class WME:
 
-    def __init__(self, identifier, attribute, value):
+    def __init__(self, identifier: str, attribute: str, value: str) -> None:
         self.identifier = identifier
         self.attribute = attribute
         self.value = value
@@ -127,7 +138,7 @@ class WME:
     def __repr__(self):
         return "(%s ^%s %s)" % (self.identifier, self.attribute, self.value)
 
-    def __eq__(self, other):
+    def __eq__(self, other: WME) -> bool:
         """
         :type other: WME
         """
@@ -140,7 +151,7 @@ class WME:
 
 class Token:
 
-    def __init__(self, parent, wme, node=None, binding=None):
+    def __init__(self, parent: Optional[Token], wme: Optional[WME], node: Any = None, binding: Optional[Dict[str, str]] = None) -> None:
         """
         :type wme: WME
         :type parent: Token
@@ -163,15 +174,15 @@ class Token:
     def __repr__(self):
         return "<Token %s>" % self.wmes
 
-    def __eq__(self, other):
+    def __eq__(self, other: Optional[Token]) -> bool:
         return isinstance(other, Token) and \
                self.parent == other.parent and self.wme == other.wme
 
-    def is_root(self):
+    def is_root(self) -> bool:
         return not self.parent and not self.wme
 
     @property
-    def wmes(self):
+    def wmes(self) -> Union[List[Optional[WME]], List[WME]]:
         ret = [self.wme]
         t = self
         while not t.parent.is_root():
@@ -179,7 +190,7 @@ class Token:
             ret.insert(0, t.wme)
         return ret
 
-    def get_binding(self, v):
+    def get_binding(self, v: str) -> Union[int, str]:
         t = self
         ret = t.binding.get(v)
         while not ret and t.parent:
@@ -187,7 +198,7 @@ class Token:
             ret = t.binding.get(v)
         return ret
 
-    def all_binding(self):
+    def all_binding(self) -> Dict:
         path = [self]
         if path[0].parent:
             path.insert(0, path[0].parent)
@@ -197,7 +208,7 @@ class Token:
         return binding
 
     @classmethod
-    def delete_token_and_descendents(cls, token):
+    def delete_token_and_descendents(cls, token: Token) -> None:
         """
         :type token: Token
         """
@@ -226,5 +237,5 @@ class Token:
                     child.left_activation(token.owner, None)
 
 
-def is_var(v):
+def is_var(v: str) -> bool:
     return v.startswith('$')

@@ -1,11 +1,15 @@
 from rete.common import BetaNode, Token
+from typing import Any
+from typing import Optional
+from rete.common import WME
+from typing import Dict
 
 
 class PNode(BetaNode):
 
     kind = 'p'
 
-    def __init__(self, children=None, parent=None, items=None, **kwargs):
+    def __init__(self, children: Optional[Any] = None, parent: Any = None, items: Optional[Any] = None, **kwargs: Any) -> None:
         """
         :type items: list of Token
         """
@@ -15,7 +19,7 @@ class PNode(BetaNode):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-    def left_activation(self, token, wme, binding=None):
+    def left_activation(self, token: Token, wme: Optional[WME], binding: Optional[Dict[str, Any]] = None) -> None:
         """
         :type wme: WME
         :type token: Token

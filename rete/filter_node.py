@@ -1,12 +1,21 @@
 import copy
 from rete.common import BetaNode
+from rete.bind_node import BindNode
+from rete.filter_node import FilterNode
+from rete.join_node import JoinNode
+from typing import List
+from typing import Union
+from rete.common import Token
+from rete.common import WME
+from typing import Any
+from typing import Dict
 
 
 class FilterNode(BetaNode):
 
     kind = 'filter-node'
 
-    def __init__(self, children, parent, tmpl):
+    def __init__(self, children: List, parent: Union[BindNode, FilterNode, JoinNode], tmpl: str) -> None:
         """
         :type children:
         :type parent: BetaNode
@@ -15,7 +24,7 @@ class FilterNode(BetaNode):
         super(FilterNode, self).__init__(children=children, parent=parent)
         self.tmpl = tmpl
 
-    def left_activation(self, token, wme, binding=None):
+    def left_activation(self, token: Token, wme: WME, binding: Dict[str, Any] = None) -> None:
         """
         :type binding: dict
         :type wme: WME

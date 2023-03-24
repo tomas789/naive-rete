@@ -11,16 +11,21 @@ from rete.join_node import JoinNode, TestAtJoinNode
 from rete.pnode import PNode
 from rete.common import Token, BetaNode, FIELDS, Has, Neg, Rule, Ncc, is_var, Filter, Bind
 from rete.beta_memory_node import BetaMemory
+from rete.common import WME
+from typing import Dict
+from typing import List
+from typing import Union
+from typing import Any
 
 
 class Network:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.alpha_root = ConstantTestNode('no-test', amem=AlphaMemory())
         self.beta_root = BetaNode()
         self.buf = None
 
-    def add_production(self, lhs, **kwargs):
+    def add_production(self, lhs: Rule, **kwargs: Any) -> PNode:
         """
         :type kwargs:
         :type lhs: Rule
@@ -28,14 +33,14 @@ class Network:
         current_node = self.build_or_share_network_for_conditions(self.beta_root, lhs, [])
         return self.build_or_share_p(current_node, **kwargs)
 
-    def remove_production(self, node):
+    def remove_production(self, node: PNode) -> None:
         self.delete_node_and_any_unused_ancestors(node)
 
-    def add_wme(self, wme):
+    def add_wme(self, wme: WME) -> None:
         self.alpha_root.activation(wme)
 
     @classmethod
-    def remove_wme(cls, wme):
+    def remove_wme(cls, wme: WME) -> None:
         """
         :type wme: WME
         """
@@ -98,14 +103,14 @@ class Network:
 
 
     @staticmethod
-    def build_or_share_var_consistency_test_node(node, variables):
+    def build_or_share_var_consistency_test_node(node: ConstantTestNode, variables: Dict[str, List[str]]) -> VarConsistencyTestNode:
         for var, slots in variables.items():
             if len(slots) > 1:
                 node = VarConsistencyTestNode.build_or_share(node, var, slots)
 
         return node
 
-    def build_or_share_alpha_memory(self, condition):
+    def build_or_share_alpha_memory(self, condition: Union[Has, Neg]) -> AlphaMemory:
         """
         :type condition: Condition
         :rtype: AlphaMemory
@@ -136,7 +141,7 @@ class Network:
         return am
 
     @classmethod
-    def get_join_tests_from_condition(cls, c, earlier_conds):
+    def get_join_tests_from_condition(cls, c: Union[Has, Neg], earlier_conds: Union[List[Union[Has, Neg]], List[Has]]) -> List[TestAtJoinNode]:
         """
         :type c: Has
         :type earlier_conds: Rule
@@ -155,7 +160,7 @@ class Network:
         return result
 
     @classmethod
-    def build_or_share_join_node(cls, parent, amem, tests, has):
+    def build_or_share_join_node(cls, parent: BetaMemory, amem: AlphaMemory, tests: List[TestAtJoinNode], has: Has) -> JoinNode:
         """
         :type has: Has
         :type parent: BetaNode
@@ -173,7 +178,7 @@ class Network:
         return node
 
     @classmethod
-    def build_or_share_negative_node(cls, parent, amem, tests):
+    def build_or_share_negative_node(cls, parent: Union[JoinNode, NccNode, NegativeNode], amem: AlphaMemory, tests: List[TestAtJoinNode]) -> NegativeNode:
         """
         :type parent: BetaNode
         :type amem: AlphaMemory
@@ -188,7 +193,7 @@ class Network:
         amem.successors.append(node)
         return node
 
-    def build_or_share_beta_memory(self, parent):
+    def build_or_share_beta_memory(self, parent: Union[BetaNode, JoinNode]) -> BetaMemory:
         """
         :type parent: BetaNode
         :rtype: BetaMemory
@@ -204,7 +209,7 @@ class Network:
         self.update_new_node_with_matches_from_above(node)
         return node
 
-    def build_or_share_p(self, parent, **kwargs):
+    def build_or_share_p(self, parent: Any, **kwargs: Any) -> PNode:
         """
         :type kwargs:
         :type parent: BetaNode
@@ -218,7 +223,7 @@ class Network:
         self.update_new_node_with_matches_from_above(node)
         return node
 
-    def build_or_share_ncc_nodes(self, parent, ncc, earlier_conds):
+    def build_or_share_ncc_nodes(self, parent: JoinNode, ncc: Ncc, earlier_conds: List[Has]) -> NccNode:
         """
         :type earlier_conds: Rule
         :type ncc: Ncc
@@ -239,7 +244,7 @@ class Network:
         self.update_new_node_with_matches_from_above(ncc_partner)
         return ncc_node
 
-    def build_or_share_filter_node(self, parent, f):
+    def build_or_share_filter_node(self, parent: Union[BindNode, FilterNode, JoinNode], f: Filter) -> FilterNode:
         """
         :type f: Filter
         :type parent: BetaNode
@@ -251,7 +256,7 @@ class Network:
         parent.children.append(node)
         return node
 
-    def build_or_share_bind_node(self, parent, b):
+    def build_or_share_bind_node(self, parent: JoinNode, b: Bind) -> BindNode:
         """
         :type b: Bind
         :type parent: BetaNode
@@ -264,7 +269,7 @@ class Network:
         parent.children.append(node)
         return node
 
-    def build_or_share_network_for_conditions(self, parent, rule, earlier_conds):
+    def build_or_share_network_for_conditions(self, parent: Union[BetaNode, JoinNode], rule: Union[Ncc, Rule], earlier_conds: List[Has]) -> Union[FilterNode, JoinNode, NegativeNode]:
         """
         :type earlier_conds: list of BaseCondition
         :type parent: BetaNode
@@ -292,7 +297,7 @@ class Network:
         return current_node
 
     @classmethod
-    def update_new_node_with_matches_from_above(cls, new_node):
+    def update_new_node_with_matches_from_above(cls, new_node: Any) -> None:
         """
         :type new_node: BetaNode
         """
@@ -316,7 +321,7 @@ class Network:
                     new_node.left_activation(token, None)
 
     @classmethod
-    def delete_node_and_any_unused_ancestors(cls, node):
+    def delete_node_and_any_unused_ancestors(cls, node: Union[JoinNode, PNode]) -> None:
         """
         :type node: BetaNode
         """

@@ -1,11 +1,18 @@
 from rete.common import BetaNode, Has
+from rete.alpha import AlphaMemory
+from rete.beta_memory_node import BetaMemory
+from rete.join_node import TestAtJoinNode
+from typing import List
+from rete.common import WME
+from rete.common import Token
+from typing import Dict
 
 
 class JoinNode(BetaNode):
 
     kind = 'join-node'
 
-    def __init__(self, children, parent, amem, tests, has):
+    def __init__(self, children: List, parent: BetaMemory, amem: AlphaMemory, tests: List[TestAtJoinNode], has: Has) -> None:
         """
         :type children:
         :type parent: BetaNode
@@ -18,7 +25,7 @@ class JoinNode(BetaNode):
         self.tests = tests
         self.has = has
 
-    def right_activation(self, wme):
+    def right_activation(self, wme: WME) -> None:
         """
         :type wme: rete.WME
         """
@@ -28,7 +35,7 @@ class JoinNode(BetaNode):
                 for child in self.children:
                     child.left_activation(token, wme, binding)
 
-    def left_activation(self, token):
+    def left_activation(self, token: Token) -> None:
         """
         :type token: rete.Token
         """
@@ -38,7 +45,7 @@ class JoinNode(BetaNode):
                 for child in self.children:
                     child.left_activation(token, wme, binding)
 
-    def perform_join_test(self, token, wme):
+    def perform_join_test(self, token: Token, wme: WME) -> bool:
         """
         :type token: rete.Token
         :type wme: rete.WME
@@ -51,7 +58,7 @@ class JoinNode(BetaNode):
                 return False
         return True
 
-    def make_binding(self, wme):
+    def make_binding(self, wme: WME) -> Dict[str, str]:
         """
         :type wme: WME
         """
@@ -64,7 +71,7 @@ class JoinNode(BetaNode):
 
 class TestAtJoinNode:
 
-    def __init__(self, field_of_arg1, condition_number_of_arg2, field_of_arg2):
+    def __init__(self, field_of_arg1: str, condition_number_of_arg2: int, field_of_arg2: str) -> None:
         self.field_of_arg1 = field_of_arg1
         self.condition_number_of_arg2 = condition_number_of_arg2
         self.field_of_arg2 = field_of_arg2
@@ -73,7 +80,7 @@ class TestAtJoinNode:
         return "<TestAtJoinNode WME.%s=Condition%s.%s?>" % (
             self.field_of_arg1, self.condition_number_of_arg2, self.field_of_arg2)
 
-    def __eq__(self, other):
+    def __eq__(self, other: TestAtJoinNode) -> bool:
         return isinstance(other, TestAtJoinNode) and \
             self.field_of_arg1 == other.field_of_arg1 and \
             self.field_of_arg2 == other.field_of_arg2 and \

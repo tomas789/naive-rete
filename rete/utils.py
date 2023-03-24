@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree as ET
 from rete import Rule, Has, Neg, Filter, Bind, Ncc
+from rete.common import Rule
+from typing import Dict
+from typing import List
+from typing import Tuple
+from rete.common import Has
+from xml.etree.ElementTree import Element
 
 
-def parse_xml(s):
+def parse_xml(s: str) -> List[Tuple[Rule, Dict]]:
     root = ET.fromstring(s)
     result = []
     for production in root:
@@ -14,7 +20,7 @@ def parse_xml(s):
     return result
 
 
-def parsing(root):
+def parsing(root: Element) -> List[Has]:
     out = []
     for cond in root:
         if cond.tag == 'has':

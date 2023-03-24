@@ -1,11 +1,17 @@
 from rete.common import BetaNode, Token
+from rete.join_node import JoinNode
+from typing import Any
+from typing import Optional
+from typing import Union
+from rete.common import WME
+from typing import Dict
 
 
 class BetaMemory(BetaNode):
 
     kind = 'beta-memory'
 
-    def __init__(self, children=None, parent=None, items=None):
+    def __init__(self, children: Optional[Any] = None, parent: Union[BetaNode, JoinNode] = None, items: Optional[Any] = None) -> None:
         """
         :type items: list of Token
         """
@@ -13,7 +19,7 @@ class BetaMemory(BetaNode):
         self.items = items if items else []
         self.children = children if children else []
 
-    def left_activation(self, token, wme, binding=None):
+    def left_activation(self, token: Token, wme: WME, binding: Dict[str, str] = None) -> None:
         """
         :type binding: dict
         :type wme: WME

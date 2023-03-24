@@ -1,9 +1,20 @@
 from rete.common import Token, BetaNode
+from rete.common import WME
+from rete.alpha import AlphaMemory
+from rete.join_node import JoinNode
+from rete.join_node import TestAtJoinNode
+from rete.ncc_node import NccNode
+from rete.negative_node import NegativeNode
+from typing import Any
+from typing import List
+from typing import Optional
+from typing import Union
+from typing import Dict
 
 
 class NegativeJoinResult:
 
-    def __init__(self, owner, wme):
+    def __init__(self, owner: Token, wme: WME) -> None:
         """
         :type wme: rete.WME
         :type owner: rete.Token
@@ -14,7 +25,7 @@ class NegativeJoinResult:
 
 class NegativeNode(BetaNode):
 
-    def __init__(self, children=None, parent=None, amem=None, tests=None):
+    def __init__(self, children: Optional[Any] = None, parent: Union[JoinNode, NccNode, NegativeNode] = None, amem: AlphaMemory = None, tests: List[TestAtJoinNode] = None) -> None:
         """
         :type amem: rete.alpha.AlphaMemory
         """
@@ -23,7 +34,7 @@ class NegativeNode(BetaNode):
         self.amem = amem
         self.tests = tests if tests else []
 
-    def left_activation(self, token, wme, binding=None):
+    def left_activation(self, token: Token, wme: Optional[WME], binding: Optional[Dict[str, str]] = None) -> None:
         """
         :type wme: rete.WME
         :type token: rete.Token
@@ -40,7 +51,7 @@ class NegativeNode(BetaNode):
             for child in self.children:
                 child.left_activation(new_token, None)
 
-    def right_activation(self, wme):
+    def right_activation(self, wme: WME) -> None:
         """
         :type wme: rete.WME
         """
@@ -52,7 +63,7 @@ class NegativeNode(BetaNode):
                 t.join_results.append(jr)
                 wme.negative_join_result.append(jr)
 
-    def perform_join_test(self, token, wme):
+    def perform_join_test(self, token: Token, wme: WME) -> bool:
         """
         :type token: rete.Token
         :type wme: rete.WME

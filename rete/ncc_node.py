@@ -1,9 +1,17 @@
 from rete.common import Token, BetaNode
+from rete.join_node import JoinNode
+from typing import Any
+from typing import List
+from typing import Optional
+from rete.common import WME
+from typing import Dict
+from rete.negative_node import NegativeNode
+from typing import Union
 
 
 class NccNode(BetaNode):
 
-    def __init__(self, children=None, parent=None, items=None, partner=None):
+    def __init__(self, children: List = None, parent: JoinNode = None, items: Optional[Any] = None, partner: Optional[Any] = None) -> None:
         """
         :type partner: NccPartnerNode
         :type items: list of rete.Token
@@ -12,7 +20,7 @@ class NccNode(BetaNode):
         self.items = items if items else []
         self.partner = partner
 
-    def left_activation(self, t, w, binding=None):
+    def left_activation(self, t: Token, w: WME, binding: Dict[str, str] = None) -> None:
         """
         :type w: rete.WME
         :type t: rete.Token
@@ -31,8 +39,8 @@ class NccNode(BetaNode):
 
 class NccPartnerNode(BetaNode):
 
-    def __init__(self, children=None, parent=None, ncc_node=None,
-                 number_of_conditions=0, new_result_buffer=None):
+    def __init__(self, children: List = None, parent: Union[JoinNode, NegativeNode] = None, ncc_node: Optional[Any] = None,
+                 number_of_conditions: int = 0, new_result_buffer: Optional[Any] = None) -> None:
         """
         :type new_result_buffer: list of rete.Token
         :type ncc_node: NccNode
@@ -42,7 +50,7 @@ class NccPartnerNode(BetaNode):
         self.number_of_conditions = number_of_conditions
         self.new_result_buffer = new_result_buffer if new_result_buffer else []
 
-    def left_activation(self, t, w, binding=None):
+    def left_activation(self, t: Token, w: WME, binding: Dict[str, str] = None) -> None:
         """
         :type w: rete.WME
         :type t: rete.Token
